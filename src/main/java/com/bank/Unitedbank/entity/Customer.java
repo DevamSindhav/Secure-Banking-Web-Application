@@ -32,7 +32,34 @@ import java.util.List;
 @NoArgsConstructor
 public class Customer{
 	
-	
+	//need a custom constructor for transition between
+	//DTO and a real entity
+
+	public Customer(
+		String fullName,
+		String email,
+		String password,
+		BigDecimal balance,
+		String accType,
+		String mobileNo,
+		String address,
+		String pin,
+		String postalCode,
+		LocalDate dob
+	){
+		this.fullName = fullName;
+		this.email = email;
+		this.password = password;
+		this.balance = balance;
+		this.accType = accType;
+		this.mobileNo = mobileNo;
+		this.address = address;
+		this.pin = pin;
+		this.postalCode = postalCode;
+		this.dob = dob;
+	}
+
+
 	@Id //tells that this is primary key
 	@GeneratedValue(strategy = GenerationType.IDENTITY) //for auto accNO generation
 	@Column(name = "account_number")

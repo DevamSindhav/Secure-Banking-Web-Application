@@ -1,17 +1,14 @@
 package com.bank.Unitedbank.service;
 
-import com.bank.Unitedbank.repository.CustomerRepository;
-
-import jakarta.transaction.Transactional;
-
-
-import com.bank.Unitedbank.entity.Customer;
+import java.math.BigDecimal;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.lang.RuntimeException;
-import java.math.BigDecimal;
+import com.bank.Unitedbank.entity.Customer;
+import com.bank.Unitedbank.repository.CustomerRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 
@@ -52,17 +49,15 @@ public class CustomerService {
 		//and then we deposit the extracted initialDeposit using the  transactionService
 		customer.setBalance(new BigDecimal("0.0"));
 			
-		 passwordEncoder.encode(customer.getPassword());
 		customer.setPassword(passwordEncoder.encode(customer.getPassword()));
 			
-	
 		customer.setPin(passwordEncoder.encode(customer.getPin()));
 			
 		Customer savedCustomer = customerRepository.save(customer);
 			
 		transService.deposit(savedCustomer.getAccNo() , initialBalance);
 			
-			
+
 		return savedCustomer;
 	}
 	

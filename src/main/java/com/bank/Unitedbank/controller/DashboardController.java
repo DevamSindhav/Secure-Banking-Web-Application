@@ -1,10 +1,12 @@
 //this controller handles the operations listed below
-//deposit , withdraw , mini statement or all the trasnsactions display
+//deposit , withdraw , mini statement or all the transactions display
 
 
 
 package com.bank.Unitedbank.controller;
 
+import com.bank.Unitedbank.dto.CustomerResponseDTO;
+import com.bank.Unitedbank.dto.TransactionResponseDTO;
 import com.bank.Unitedbank.service.TransactionService;
 import com.bank.Unitedbank.entity.Transaction;
 import com.bank.Unitedbank.entity.Customer;
@@ -42,12 +44,25 @@ public class DashboardController {
 	            return "redirect:/login"; 
 	        }
 			
-			
+			//fetches the customer entity
 			Customer customer = customerService.getCustomerById(accNo);
-			model.addAttribute("customerProfile" , customer);
+
+			//we need not pass the password and pin to the user so
+			//convert the Customer to a DTO object
+
+			CustomerResponseDTO customerDTO = CustomerResponseDTO.convertCustomerToCRDTO(customer);
+
+
+			model.addAttribute("customerProfile" , customerDTO);
 			
-			List<Transaction> transactions = transactionService.getMiniStatement(accNo); 
-			model.addAttribute("recentTransactions",transactions);
+			List<Transaction> transactions = transactionService.getMiniStatement(accNo);
+
+			//below code converts the list of transactions to the list of DTO object
+			List<TransactionResponseDTO> transactionsDTO = transactions.stream()
+					.map(TransactionResponseDTO::convertTransactionToTRDTO)
+					.toList();
+
+			model.addAttribute("recentTransactions",transactionsDTO);
 			
 			return "dashboardPage";
 			
@@ -68,11 +83,20 @@ public class DashboardController {
 				return "redirect:/login";
 			}
 			
-			Customer customer = customerService.getCustomerById(accNo);
-			model.addAttribute("customerProfile" , customer);
+
+			CustomerResponseDTO customerResponseDTO =
+					CustomerResponseDTO.convertCustomerToCRDTO(customerService.getCustomerById(accNo));
+
+			model.addAttribute("customerProfile" , customerResponseDTO);
 			
 			List<Transaction> allTransactions = transactionService.getAllStatement(accNo);
-			model.addAttribute("allTransactions" , allTransactions);
+
+			//below code converts the list of transactions to the list of DTO object
+			List<TransactionResponseDTO> transactionsDTO = allTransactions.stream()
+					.map(TransactionResponseDTO::convertTransactionToTRDTO)
+					.toList();
+
+			model.addAttribute("allTransactions" , transactionsDTO);
 			
 			return "fullStatementPage";
 			

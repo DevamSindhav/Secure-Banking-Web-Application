@@ -1,12 +1,13 @@
 //this controller handles all the public action a user can take 
-//like login, logout , or register etc..
+//like login, logout , or register etc.
 
 
 package com.bank.Unitedbank.controller;
 
 import com.bank.Unitedbank.entity.Customer;
+import com.bank.Unitedbank.dto.CustomerResponseDTO;
 import com.bank.Unitedbank.service.CustomerService;
-
+import com.bank.Unitedbank.dto.CustomerRegisterDTO;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Controller;
@@ -36,19 +37,24 @@ public class AuthorizationController{
 	@GetMapping("/register")
 	public String showRegistration(Model model) {
 		
-		model.addAttribute("customer" , new Customer());
+		model.addAttribute("customerDTO" , new CustomerRegisterDTO());
 		return "registerPage";
 		
 	}
 	
 	@PostMapping("/register")
-	public String registrationProcess(@ModelAttribute Customer customer, 
+	public String registrationProcess(@ModelAttribute CustomerRegisterDTO customerRegisterDTO,
 										RedirectAttributes redirectAttributes ,Model model) {
 		
 		try {
+
+			//Convert the DTO fields in to a real Customer object
+
+			Customer realCustomer = CustomerRegisterDTO.convertCRegDTOtoCustomer(customerRegisterDTO);
 			
+
 			//success
-			customerService.registerCustomer(customer);
+			customerService.registerCustomer(realCustomer);
 			redirectAttributes.addAttribute("registeredUser", true);
 			return "redirect:/login";
 		

@@ -168,7 +168,7 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Initial Balance (Minimum $100)</label>
+                        <label class="form-label">Initial Balance (Minimum $1000)</label>
                         <div class="input-group">
                             <span class="input-group-text">$</span>
                             <input type="number" name="balance" class="form-control" value="${customer.balance}" min="100" step="0.01" required>

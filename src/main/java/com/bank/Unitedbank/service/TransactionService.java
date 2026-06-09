@@ -1,5 +1,7 @@
-//code can be shorter if i don't initialize temporary variables
-//but i have decided to keep those vars for the readability
+/*
+code can be shorter if I don't initialize temporary variables,
+but I have decided to keep those vars for the readability
+*/
 
 package com.bank.Unitedbank.service;
 
