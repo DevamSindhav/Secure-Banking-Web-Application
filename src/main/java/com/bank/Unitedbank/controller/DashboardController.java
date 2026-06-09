@@ -17,6 +17,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Controller
@@ -105,5 +108,50 @@ public class DashboardController {
 			return "redirect:/dashboard";
 		}
 	}
+
+//	@GetMapping("/filterTransactionOnDate")
+//	public String getTransactionsByMonth(
+//			@RequestParam LocalDate startDate ,
+//			@RequestParam LocalDate endDate,
+//			HttpSession session, Model model,
+//			RedirectAttributes redirectAttributes
+//	){
+//
+//		try{
+//
+//			Integer accNo = (Integer) session.getAttribute("accNo");
+//
+//			if(accNo == null){
+//				return "redirect:/login";
+//			}
+//
+//			Customer customer = customerService.getCustomerById(accNo);
+//
+//			CustomerResponseDTO customerResponseDTO = CustomerResponseDTO.convertCustomerToCRDTO(customer);
+//
+//			model.addAttribute("customerProfile" , customerResponseDTO);
+//
+//			//converting the LocalDate to LocalDateTime range for the service
+//			//as we have stored LocalDateTime in DB
+//
+//			LocalDateTime startDateTime = startDate.atStartOfDay();
+//			LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+//
+//			List<Transaction> transactions = transactionService.getMonthStatement(accNo, startDateTime , endDateTime);
+//
+//			List<TransactionResponseDTO> transactionsDTO = transactions.stream()
+//					.map(TransactionResponseDTO::convertTransactionToTRDTO)
+//					.toList();
+//
+//			model.addAttribute("transactionsByMonth" , transactionsDTO);
+//
+//			return "monthStatementPage";
+//
+//		}catch(RuntimeException e){
+//			redirectAttributes.addFlashAttribute("error" , e.getMessage());
+//			return "redirect:/dashboard";
+//		}
+//
+//	}
 
 }

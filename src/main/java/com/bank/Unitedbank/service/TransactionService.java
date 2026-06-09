@@ -7,6 +7,7 @@ package com.bank.Unitedbank.service;
 
 
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -142,6 +143,11 @@ public class TransactionService {
 	public List<Transaction> getMiniStatement(Integer accNo){
 		
 		return transactionRepository.findTop10ByCustomerAccNoOrderByTimeStampDesc(accNo);
+	}
+
+	public List<Transaction> getMonthStatement(Integer accNo, LocalDateTime startDate , LocalDateTime endDate ){
+
+		return transactionRepository.findByCustomerAccNoAndTimeStampBetweenOrderByTimeStampDesc(accNo , startDate , endDate);
 	}
 	
 }
