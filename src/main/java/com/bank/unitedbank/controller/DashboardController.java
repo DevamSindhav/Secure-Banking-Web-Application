@@ -3,23 +3,20 @@
 
 
 
-package com.bank.Unitedbank.controller;
+package com.bank.unitedbank.controller;
 
-import com.bank.Unitedbank.dto.CustomerResponseDTO;
-import com.bank.Unitedbank.dto.TransactionResponseDTO;
-import com.bank.Unitedbank.service.TransactionService;
-import com.bank.Unitedbank.entity.Transaction;
-import com.bank.Unitedbank.entity.Customer;
-import com.bank.Unitedbank.service.CustomerService;
+import com.bank.unitedbank.dto.CustomerResponseDTO;
+import com.bank.unitedbank.dto.TransactionResponseDTO;
+import com.bank.unitedbank.service.TransactionService;
+import com.bank.unitedbank.entity.Transaction;
+import com.bank.unitedbank.entity.Customer;
+import com.bank.unitedbank.service.CustomerService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 @Controller

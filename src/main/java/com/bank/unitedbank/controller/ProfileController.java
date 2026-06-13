@@ -1,6 +1,6 @@
-package com.bank.Unitedbank.controller;
+package com.bank.unitedbank.controller;
 
-import com.bank.Unitedbank.service.CustomerService;
+import com.bank.unitedbank.service.CustomerService;
 
 import jakarta.servlet.http.HttpSession;
 

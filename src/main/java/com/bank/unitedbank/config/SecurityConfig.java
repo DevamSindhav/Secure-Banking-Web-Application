@@ -1,4 +1,4 @@
-package com.bank.Unitedbank.config;
+package com.bank.unitedbank.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

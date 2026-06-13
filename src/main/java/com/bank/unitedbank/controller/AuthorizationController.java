@@ -2,12 +2,11 @@
 //like login, logout , or register etc.
 
 
-package com.bank.Unitedbank.controller;
+package com.bank.unitedbank.controller;
 
-import com.bank.Unitedbank.entity.Customer;
-import com.bank.Unitedbank.dto.CustomerResponseDTO;
-import com.bank.Unitedbank.service.CustomerService;
-import com.bank.Unitedbank.dto.CustomerRegisterDTO;
+import com.bank.unitedbank.entity.Customer;
+import com.bank.unitedbank.service.CustomerService;
+import com.bank.unitedbank.dto.CustomerRegisterDTO;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Controller;

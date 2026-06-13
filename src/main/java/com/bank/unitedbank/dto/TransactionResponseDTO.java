@@ -1,13 +1,12 @@
-package com.bank.Unitedbank.dto;
+package com.bank.unitedbank.dto;
 
 import lombok.Data;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
-import com.bank.Unitedbank.entity.Transaction;
+import com.bank.unitedbank.entity.Transaction;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.LocalDate;
 

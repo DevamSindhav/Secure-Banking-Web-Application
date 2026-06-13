@@ -1,4 +1,4 @@
-package com.bank.Unitedbank.entity;
+package com.bank.unitedbank.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,8 +16,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "transaction_records")
@@ -25,39 +25,38 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Transaction{
-	
-	public Transaction(Customer customer , BigDecimal amount , String transactionType) {
-		
-		this.customer = customer;
+
+	public Transaction(Account account , BigDecimal amount , String transactionType) {
+
+		this.account = account;
 		this.amount = amount;
 		this.transactionType = transactionType;
 	}
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "transaction_id")
-	private Integer transactionId;
-	
-	
+	private Long transactionId;
+
+
 	@ManyToOne
 	@JoinColumn(name = "account_number" , nullable = false)
-	private Customer  customer;
+	private Account account;
 /*
  * beacuse we have mapped them we no longer need this field hibernate will take care
  * to store the appropriate column data in the table
 	@Column(name = "account_number")
 	private int accNo;
 */
-	
-	@Column(name = "amount")
+
+	@Column(name = "amount" , nullable = false)
 	private BigDecimal amount;
-	
-	@Column(name = "transaction_type")
+
+	@Column(name = "transaction_type" , nullable = false)
 	private String transactionType;
-	
+
 	@Column(name = "transaction_time" , updatable = false)
 	@CreationTimestamp
-	private LocalDateTime timeStamp;
-	
-	
+	private Instant timeStamp;
+
 }

@@ -1,4 +1,4 @@
-package com.bank.Unitedbank;
+package com.bank.unitedbank;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;

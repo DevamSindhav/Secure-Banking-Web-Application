@@ -1,9 +1,9 @@
-package com.bank.Unitedbank.dto;
+package com.bank.unitedbank.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import com.bank.Unitedbank.entity.Customer;
+import com.bank.unitedbank.entity.Customer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

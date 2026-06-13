@@ -3,7 +3,14 @@ code can be shorter if I don't initialize temporary variables,
 but I have decided to keep those vars for the readability
 */
 
-package com.bank.Unitedbank.service;
+/*
+* I came to know that accessing a customerRepo might be trespassing in the customers domain
+* I can make a Customer Service method to do this but that will create cycle between two service
+* decided to keep it as it is
+* if required can solve this by a new Service called as AccountService
+* */
+
+package com.bank.unitedbank.service;
 
 
 import jakarta.transaction.Transactional;
@@ -12,10 +19,10 @@ import java.time.LocalDateTime;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.bank.Unitedbank.entity.Customer;
-import com.bank.Unitedbank.entity.Transaction;
-import com.bank.Unitedbank.repository.CustomerRepository;
-import com.bank.Unitedbank.repository.TransactionRepository;
+import com.bank.unitedbank.entity.Customer;
+import com.bank.unitedbank.entity.Transaction;
+import com.bank.unitedbank.repository.CustomerRepository;
+import com.bank.unitedbank.repository.TransactionRepository;
 
 import java.math.BigDecimal;
 import java.util.List;

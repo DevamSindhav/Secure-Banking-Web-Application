@@ -1,12 +1,12 @@
-package com.bank.Unitedbank.service;
+package com.bank.unitedbank.service;
 
 import java.math.BigDecimal;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.bank.Unitedbank.entity.Customer;
-import com.bank.Unitedbank.repository.CustomerRepository;
+import com.bank.unitedbank.entity.Customer;
+import com.bank.unitedbank.repository.CustomerRepository;
 
 import jakarta.transaction.Transactional;
 
