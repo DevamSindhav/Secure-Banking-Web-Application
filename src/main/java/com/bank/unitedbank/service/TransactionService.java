@@ -13,15 +13,14 @@ but I have decided to keep those vars for the readability
 package com.bank.unitedbank.service;
 
 
+import com.bank.unitedbank.entity.Account;
 import jakarta.transaction.Transactional;
-import java.time.LocalDateTime;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
+import java.time.Instant;
+
 import org.springframework.stereotype.Service;
 
-import com.bank.unitedbank.entity.Customer;
 import com.bank.unitedbank.entity.Transaction;
-import com.bank.unitedbank.repository.CustomerRepository;
 import com.bank.unitedbank.repository.TransactionRepository;
 
 import java.math.BigDecimal;
@@ -30,131 +29,115 @@ import java.util.List;
 @Service
 @Transactional
 public class TransactionService {
-	
-	private final CustomerRepository customerRepository;
-	private final TransactionRepository transactionRepository;
-	private final PasswordEncoder passwordEncoder;
 
-	public TransactionService(CustomerRepository cRepository , TransactionRepository tRepository ,
-									PasswordEncoder pEncoder) {
-		this.customerRepository = cRepository;
-		this.passwordEncoder = pEncoder;
+	private final TransactionRepository transactionRepository;
+
+	public TransactionService(TransactionRepository tRepository) {
 		this.transactionRepository = tRepository;
 	}
 	
 	
-	public void deposit(Integer accNo , BigDecimal amount) {
-		
-		Customer customer = customerRepository.findById(accNo)
-							.orElseThrow(() -> new RuntimeException("Account not found"));
-		
+//	public BigDecimal deposit(Account account , BigDecimal amount) {
+//
+//		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+//	        throw new RuntimeException("Deposit amount must be greater than zero.");
+//	    }
+//
+//		Transaction transaction = new Transaction(account , amount , "DEPOSIT_00");
+//
+//		transactionRepository.save(transaction);
+//
+//		return account.getBalance().add(amount);
+//	}
+	
+	
+//	public BigDecimal withdraw(Account account , String plainPin , BigDecimal amount) {
+//
+//		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+//	        throw new RuntimeException("Withdrawal amount must be greater than zero.");
+//	    }
+//
+//		boolean isMatch = passwordEncoder.matches(plainPin , account.getPinHash());
+//
+//		if(!isMatch) {
+//			throw new RuntimeException("Pin is incorrect.");
+//		}
+//
+//		BigDecimal currentBalance = account.getBalance();
+//
+//		if(currentBalance.compareTo(amount) < 0) {
+//
+//			throw new RuntimeException("Not enough balance.");
+//		}
+//
+//		BigDecimal newBalance = currentBalance.subtract(amount);
+//
+//		Transaction transaction = new Transaction(account , amount , "WITHDRAW_11");
+//
+//		transactionRepository.save(transaction);
+//
+//		return newBalance;
+//	}
+//
+//	public void transfer(Account senderAcc ,String plainPin , Account receiverAcc , BigDecimal amount) {
+//
+//		if (senderAcc.getAccNo().equals(receiverAcc.getAccNo())) {
+//	        throw new RuntimeException("Cannot transfer money to the same account.");
+//	    }
+//
+//		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+//	        throw new RuntimeException("Transfer amount must be greater than zero.");
+//	    }
+//
+//		boolean isMatch = passwordEncoder.matches(plainPin , senderAcc.getPinHash() );
+//
+//		if(!isMatch) {
+//			throw new RuntimeException("Pin is incorrect.");
+//		}
+//
+//		BigDecimal senderCurrentBalance = senderAcc.getBalance();
+//		BigDecimal receiverCurrentBalance = receiverAcc.getBalance();
+//
+//		if(senderCurrentBalance.compareTo(amount) < 0) {
+//			throw new RuntimeException("Not enough balance.");
+//		}
+//
+//		BigDecimal senderNewBalance = senderCurrentBalance.subtract(amount);
+//		BigDecimal receiverNewBalance = receiverCurrentBalance.add(amount);
+//
+//		senderAcc.setBalance(senderNewBalance);
+//		receiver.setBalance(receiverNewBalance);
+//
+//		Transaction senderTransaction = new Transaction(senderAcc , amount , "TRANSFER_TO_" + receiverAcc.getAccNo().toString());
+//		Transaction receiverTransaction = new Transaction(receiverAcc , amount , "TRANSFER_FROM_" + senderAcc.getAccNo().toString() );
+//
+//		transactionRepository.save(senderTransaction);
+//		transactionRepository.save(receiverTransaction);
+//
+//		return ??
+//
+//	}
 
-		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-	        throw new RuntimeException("Deposit amount must be greater than zero.");
-	    }
-		
-		BigDecimal currentBalance = customer.getBalance();
-		
-		customer.setBalance(currentBalance.add(amount));
-		
-		Transaction transaction = new Transaction(customer , amount , "DEPOSIT");
-		
-		customerRepository.save(customer);
-		transactionRepository.save(transaction);
-		
+	public void recordTransaction(Account account , BigDecimal amount , String transactionType){
+
+		Transaction newTransaction = new Transaction(account , amount , transactionType);
+
+		transactionRepository.save(newTransaction);
 	}
 	
-	
-	public void withdraw(Integer accNo , String plainPin , BigDecimal amount) {
+	public List<Transaction> getAllStatement(Long accNo){
 		
-		Customer customer = customerRepository.findById(accNo)
-				.orElseThrow(() -> new RuntimeException("Account not found."));
-		
-		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-	        throw new RuntimeException("Withdrawal amount must be greater than zero.");
-	    }
-		
-		boolean isMatch = passwordEncoder.matches(plainPin , customer.getPin());
-		
-		if(!isMatch) {
-			throw new RuntimeException("Pin is incorrect.");
-		}
-		
-		BigDecimal currentBalance = customer.getBalance();
-		if(currentBalance.compareTo(amount) < 0) {
-			
-			throw new RuntimeException("Not enough balance.");
-		}
-		
-		BigDecimal newBalance = currentBalance.subtract(amount);
-		
-		customer.setBalance(newBalance);
-		
-		Transaction transaction = new Transaction(customer, amount , "WITHDRAW");
-		
-		customerRepository.save(customer);
-		transactionRepository.save(transaction);
-		
+		return transactionRepository.findByAccountAccNoOrderByTimeStampDesc(accNo);
 	}
 	
-	public void transfer(Integer senderAccNo ,String plainPin , Integer receiverAccNo , BigDecimal amount) {
+	public List<Transaction> getMiniStatement(Long accNo){
 		
-		Customer sender = customerRepository.findById(senderAccNo)
-				.orElseThrow(() -> new RuntimeException("Account not found."));
-		
-		Customer receiver = customerRepository.findById(receiverAccNo)
-				.orElseThrow(() -> new RuntimeException("Receiver not found."));
-		
-		if (senderAccNo.equals(receiverAccNo)) {
-	        throw new RuntimeException("Cannot transfer money to the same account.");
-	    }
-		
-		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-	        throw new RuntimeException("Withdrawal amount must be greater than zero.");
-	    }
-		
-		boolean isMatch = passwordEncoder.matches(plainPin , sender.getPin() );
-		
-		if(!isMatch) {
-			throw new RuntimeException("Pin is incorrect.");
-		}
-		
-		BigDecimal senderCurrentBalance = sender.getBalance();
-		BigDecimal receiverCurrentBalance = receiver.getBalance();
-		
-		if(senderCurrentBalance.compareTo(amount) < 0) {
-			throw new RuntimeException("Not enough balance.");
-		}
-		
-		BigDecimal senderNewBalance = senderCurrentBalance.subtract(amount);
-		BigDecimal receiverNewBalance = receiverCurrentBalance.add(amount);
-		
-		sender.setBalance(senderNewBalance);
-		receiver.setBalance(receiverNewBalance);
-		
-		Transaction senderTransaction = new Transaction(sender , amount , "WITHDRAW");
-		Transaction receiverTransaction = new Transaction(receiver , amount , "DEPOSIT");
-		
-		customerRepository.save(sender);
-		customerRepository.save(receiver);
-		transactionRepository.save(senderTransaction);
-		transactionRepository.save(receiverTransaction);
-		
-	}
-	
-	public List<Transaction> getAllStatement(Integer accNo){
-		
-		return transactionRepository.findByCustomerAccNoOrderByTimeStampDesc(accNo);
-	}
-	
-	public List<Transaction> getMiniStatement(Integer accNo){
-		
-		return transactionRepository.findTop10ByCustomerAccNoOrderByTimeStampDesc(accNo);
+		return transactionRepository.findTop10ByAccountAccNoOrderByTimeStampDesc(accNo);
 	}
 
-	public List<Transaction> getMonthStatement(Integer accNo, LocalDateTime startDate , LocalDateTime endDate ){
+	public List<Transaction> getMonthStatement(Long accNo, Instant startDate , Instant endDate ){
 
-		return transactionRepository.findByCustomerAccNoAndTimeStampBetweenOrderByTimeStampDesc(accNo , startDate , endDate);
+		return transactionRepository.findByAccountAccNoAndTimeStampBetweenOrderByTimeStampDesc(accNo , startDate , endDate);
 	}
 	
 }
