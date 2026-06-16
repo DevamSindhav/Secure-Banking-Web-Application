@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.List;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -17,7 +18,17 @@ import org.hibernate.annotations.SQLRestriction;
 @AllArgsConstructor
 @NoArgsConstructor
 @SQLRestriction("is_account_valid = true")
+@Builder
 public class Account {
+
+    //RegisterDTO to account conversion constructor
+
+    //handled using BUILDER annotation
+//    public Account(String accType, BigDecimal balance, String pinHashed) {
+//        this.accType = accType;
+//        this.balance = balance;
+//        this.pinHashed = pinHashed;
+//    }
 
     @Id//tells that this is primary key
     @Column(name = "account_number")

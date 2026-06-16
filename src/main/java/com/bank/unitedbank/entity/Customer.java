@@ -4,6 +4,7 @@ package com.bank.unitedbank.entity;
 import lombok.Data;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.Builder;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -29,7 +30,26 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @SQLRestriction("is_customer_valid = true")
+@Builder //this is very useful annotation for Dto to entity mapping
 public class Customer{
+
+	//Below code functionality is handled by BUILDER annotation
+//	//Constructor for conversion
+//	public Customer(String fullName,
+//					String email,
+//					String passwordHashed,
+//					String address,
+//					String postalCode,
+//					String mobileNo, LocalDate dob
+//	) {
+//		this.fullName = fullName;
+//		this.email = email;
+//		this.passwordHashed = passwordHashed;
+//		this.address = address;
+//		this.postalCode = postalCode;
+//		this.mobileNo = mobileNo;
+//		this.dob = dob;
+//	}
 
 	@Id //tells that this is primary key
 	@GeneratedValue(strategy = GenerationType.IDENTITY) //for auto accNO generation

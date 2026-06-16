@@ -5,8 +5,8 @@
 
 package com.bank.unitedbank.controller;
 
-import com.bank.unitedbank.dto.CustomerResponseDTO;
-import com.bank.unitedbank.dto.TransactionResponseDTO;
+import com.bank.unitedbank.dto.CustomerDAtaDTO;
+import com.bank.unitedbank.dto.response.TransactionDataDTO;
 import com.bank.unitedbank.service.TransactionService;
 import com.bank.unitedbank.entity.Transaction;
 import com.bank.unitedbank.entity.Customer;
@@ -50,7 +50,7 @@ public class DashboardController {
 			//we need not pass the password and pin to the user so
 			//convert the Customer to a DTO object
 
-			CustomerResponseDTO customerDTO = CustomerResponseDTO.convertCustomerToCRDTO(customer);
+			CustomerDAtaDTO customerDTO = CustomerDAtaDTO.convertCustomerToCRDTO(customer);
 
 
 			model.addAttribute("customerProfile" , customerDTO);
@@ -58,8 +58,8 @@ public class DashboardController {
 			List<Transaction> transactions = transactionService.getMiniStatement(accNo);
 
 			//below code converts the list of transactions to the list of DTO object
-			List<TransactionResponseDTO> transactionsDTO = transactions.stream()
-					.map(TransactionResponseDTO::convertTransactionToTRDTO)
+			List<TransactionDataDTO> transactionsDTO = transactions.stream()
+					.map(TransactionDataDTO::convertTransactionToTRDTO)
 					.toList();
 
 			model.addAttribute("recentTransactions",transactionsDTO);
@@ -84,16 +84,16 @@ public class DashboardController {
 			}
 			
 
-			CustomerResponseDTO customerResponseDTO =
-					CustomerResponseDTO.convertCustomerToCRDTO(customerService.getCustomerById(accNo));
+			CustomerDAtaDTO customerResponseDTO =
+					CustomerDAtaDTO.convertCustomerToCRDTO(customerService.getCustomerById(accNo));
 
 			model.addAttribute("customerProfile" , customerResponseDTO);
 			
 			List<Transaction> allTransactions = transactionService.getAllStatement(accNo);
 
 			//below code converts the list of transactions to the list of DTO object
-			List<TransactionResponseDTO> transactionsDTO = allTransactions.stream()
-					.map(TransactionResponseDTO::convertTransactionToTRDTO)
+			List<TransactionDataDTO> transactionsDTO = allTransactions.stream()
+					.map(TransactionDataDTO::convertTransactionToTRDTO)
 					.toList();
 
 			model.addAttribute("allTransactions" , transactionsDTO);

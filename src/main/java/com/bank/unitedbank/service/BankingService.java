@@ -1,7 +1,5 @@
 package com.bank.unitedbank.service;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 

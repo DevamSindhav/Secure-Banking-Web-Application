@@ -1,11 +1,11 @@
 package com.bank.unitedbank.service;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.bank.unitedbank.entity.Customer;
 import com.bank.unitedbank.entity.Account;
 import com.bank.unitedbank.repository.CustomerRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jakarta.transaction.Transactional;
 
@@ -26,7 +26,7 @@ public class CustomerService {
 							PasswordEncoder passEncode ,
 							AccountService accountService,
 							BankingService bankingService
-	) {
+	){
 		
 		this.customerRepository = customerRepo;
 		this.passwordEncoder = passEncode;
