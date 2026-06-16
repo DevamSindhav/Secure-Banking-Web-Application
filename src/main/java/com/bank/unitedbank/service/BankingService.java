@@ -15,15 +15,12 @@ public class BankingService {
 
     private final AccountService accountService;
     private final TransactionService transactionService;
-    private final PasswordEncoder passwordEncoder;
 
     public BankingService(AccountService accountService,
-                          TransactionService transactionService,
-                          PasswordEncoder passwordEncoder
+                          TransactionService transactionService
     ){
         this.accountService = accountService;
         this.transactionService = transactionService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     public void deposit(Long accNo , BigDecimal amount){
@@ -32,7 +29,7 @@ public class BankingService {
             throw new RuntimeException("Deposit amount can not be 0");
         }
 
-        Account account = accountService.findAccount(accNo);
+        Account account = accountService.getAccountById(accNo);
 
         accountService.updateBalance(account , account.getBalance().add(amount));
 
@@ -44,11 +41,9 @@ public class BankingService {
             throw new RuntimeException("Withdraw amount can not be 0");
         }
 
-        Account account = accountService.findAccount(accNo);
+        Account account = accountService.getAccountById(accNo);
 
-        boolean isMatch = passwordEncoder.matches(plainPin , account.getPinHash());
-
-        if(!isMatch){
+        if(!accountService.isPinCorrect(account , plainPin)){
             throw new RuntimeException("Pin is incorrect");
         }
 
@@ -71,11 +66,9 @@ public class BankingService {
             throw new RuntimeException("Transfer amount can not be 0");
         }
 
-        Account senderAccount = accountService.findAccount(senderAccNo);
+        Account senderAccount = accountService.getAccountById(senderAccNo);
 
-        boolean isMatch = passwordEncoder.matches(plainPin , senderAccount.getPinHash());
-
-        if(!isMatch){
+        if(!accountService.isPinCorrect(senderAccount , plainPin)){
             throw new RuntimeException("Pin is incorrect");
         }
 
@@ -85,7 +78,7 @@ public class BankingService {
             throw new RuntimeException("Not enough Balance");
         }
 
-        Account receiverAccount = accountService.findAccount(receiverAccNo);
+        Account receiverAccount = accountService.getAccountById(receiverAccNo);
 
         accountService.updateBalance(senderAccount , senderAccount.getBalance().subtract(amount));
         accountService.updateBalance(receiverAccount , receiverAccount.getBalance().add(amount));

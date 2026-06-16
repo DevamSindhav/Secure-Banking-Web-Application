@@ -20,32 +20,35 @@ public class CustomerService {
 	private final CustomerRepository customerRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final AccountService accountService;
-	private final TransactionService transactionService;
 	private final BankingService bankingService;
 	
 	public  CustomerService(CustomerRepository customerRepo ,
 							PasswordEncoder passEncode ,
 							AccountService accountService,
-							TransactionService transactionService,
 							BankingService bankingService
 	) {
 		
 		this.customerRepository = customerRepo;
 		this.passwordEncoder = passEncode;
 		this.accountService = accountService;
-		this.transactionService = transactionService;
 		this.bankingService = bankingService;
 	}
 	
 	public Customer registerCustomer(Customer customer , Account account) {
-		
-		
+
 		//email already exists or not is checked
 		if(customerRepository.findByEmail(customer.getEmail()).isPresent()) {
 			throw new RuntimeException("This email is already Registered.");
 		}
 		BigDecimal initialBalance = account.getBalance();
-		customer.setPassword(passwordEncoder.encode(customer.getPassword()));
+
+		BigDecimal minIniBalance = new BigDecimal("1000.0");
+
+		if(initialBalance.compareTo(minIniBalance) < 0){
+			throw new RuntimeException("Initial Balance is Less Than minimum Balance.");
+		}
+
+		customer.setPasswordHashed(passwordEncoder.encode(customer.getPasswordHashed()));
 
 		Customer registeredCustomer = customerRepository.save(customer);
 
@@ -55,21 +58,12 @@ public class CustomerService {
 
 		return registeredCustomer;
 	}
-	
-	public Customer getCustomerById(Long customerId) {
-		
-		return customerRepository.findById(customerId)
-				.orElseThrow(() -> new RuntimeException("Customer not found."));
-	}
-	
+
 	public Customer loginValidation(String email , String plainPass) {
 		
-		Customer customer = customerRepository.findByEmail(email)
-							.orElseThrow(() -> new RuntimeException("Customer not found."));
-		
-		boolean isMatch = passwordEncoder.matches(plainPass , customer.getPassword() );
-		
-		if(!isMatch) {
+		Customer customer = getCustomerByEmail(email);
+
+		if(!isPasswordCorrect(customer , plainPass)) {
 			throw new RuntimeException("Password is incorrect.");
 		}
 		
@@ -79,42 +73,23 @@ public class CustomerService {
 	
 	public void passwordUpdate(Long customerId , String oldPlainPass , String newPlainPass) {
 		
-		Customer customer = customerRepository.findById(customerId)
-							.orElseThrow(() -> new RuntimeException("Customer not found."));
+		Customer customer = getCustomerById(customerId);
 		
-		if(!passwordEncoder.matches(oldPlainPass, customer.getPassword())) {
+		if(!isPasswordCorrect(customer , oldPlainPass)) {
 			throw new RuntimeException("Password is incorrect");
 		}
 
-		customer.setPassword(passwordEncoder.encode(newPlainPass));
+		customer.setPasswordHashed(passwordEncoder.encode(newPlainPass));
 		
 		customerRepository.save(customer);
 		
 	}
-	
-//	public void pinUpdate(Integer accNo , String plainPass , String newPlainPin) {
-//
-//		Customer customer = customerRepository.findById(accNo)
-//				.orElseThrow(() -> new RuntimeException("Account not found."));
-//
-//
-//		if(!passwordEncoder.matches(plainPass, customer.getPassword())) {
-//			throw new RuntimeException("Password is incorrect");
-//		}
-//
-//
-//		customer.setPin(passwordEncoder.encode(newPlainPin));
-//
-//		customerRepository.save(customer);
-//
-//	}
-//
-	public void deleteAccount(Long customerId , String plainPass) {
 
-		Customer customer = customerRepository.findById(customerId)
-				.orElseThrow(() -> new RuntimeException("Customer not found."));
+	public void deleteCustomer(Long customerId , String plainPass) {
 
-		if(!passwordEncoder.matches(plainPass, customer.getPassword())) {
+		Customer customer = getCustomerById(customerId);
+
+		if(!isPasswordCorrect(customer , plainPass)) {
 			throw new RuntimeException("Password is incorrect");
 		}
 
@@ -125,7 +100,63 @@ public class CustomerService {
 		}
 
 		customer.setIsCustomerValid(false);
+
 		customerRepository.save(customer);
+	}
+
+	public void deleteAccount(Long customerId , Long accNo , String plainPass){
+		Customer customer = getCustomerById(customerId);
+
+		if(!isPasswordCorrect(customer, plainPass)){
+			throw new RuntimeException("Password is incorrect");
+		}
+
+		if(!isOwnerOfAccount(customer , accNo)){
+			throw new RuntimeException("Account not found");
+		}
+
+		accountService.deleteAccount(accNo);
+	}
+
+	public void updateAccountPin(Long customerId , Long accNo , String plainPass , String newPlainPin){
+		Customer customer = getCustomerById(customerId);
+
+		if(!isPasswordCorrect(customer , plainPass)){
+			throw new RuntimeException("Password is incorrect");
+		}
+
+		if(!isOwnerOfAccount(customer , accNo)){
+			throw new RuntimeException("Account not found");
+		}
+
+		accountService.updatePin(accNo , newPlainPin);
+	}
+	//Helper Methods
+	public boolean isPasswordCorrect(Customer customer , String plainPass){
+
+		return passwordEncoder.matches(
+				plainPass,
+				customer.getPasswordHashed()
+		);
+	}
+
+	public Customer getCustomerById(Long customerId) {
+
+		return customerRepository.findById(customerId)
+				.orElseThrow(() -> new RuntimeException("Customer not found."));
+	}
+
+	public Customer getCustomerByEmail(String email){
+		return customerRepository.findByEmail(email)
+				.orElseThrow( () -> new RuntimeException("Customer not found."));
+	}
+
+	public boolean isOwnerOfAccount(Customer customer , Long accNo){
+		Account account = accountService.getAccountById(accNo);
+
+		return account.getCustomer()
+				.getCustomerId()
+				.equals(customer.getCustomerId());
 	}
 
 }

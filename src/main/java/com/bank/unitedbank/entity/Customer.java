@@ -43,7 +43,7 @@ public class Customer{
 	private String email;
 
 	@Column(name = "password_hashed" , nullable = false)
-	private String password;
+	private String passwordHashed;
 
 	//this tells that customer can have multiple Accounts
 	//no cascade Type chosen as we don't want to delete customer

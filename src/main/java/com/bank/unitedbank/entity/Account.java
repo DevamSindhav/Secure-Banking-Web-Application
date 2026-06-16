@@ -35,7 +35,7 @@ public class Account {
     private BigDecimal balance;
 
     @Column(name = "pin_hashed" , nullable = false)
-    private String pinHash;
+    private String pinHashed;
 
     @Column(name = "created_at" , nullable = false , updatable = false)
     @CreationTimestamp
