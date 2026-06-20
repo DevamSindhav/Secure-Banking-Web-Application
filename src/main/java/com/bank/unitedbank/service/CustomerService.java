@@ -1,5 +1,6 @@
 package com.bank.unitedbank.service;
 
+import com.bank.unitedbank.exception.*;
 import org.springframework.stereotype.Service;
 
 import com.bank.unitedbank.entity.Customer;
@@ -10,6 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import jakarta.transaction.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.Period;
 
 @Service
 //transactional annotation helps to make sure that it is done then it is done
@@ -27,7 +30,6 @@ public class CustomerService {
 							AccountService accountService,
 							BankingService bankingService
 	){
-		
 		this.customerRepository = customerRepo;
 		this.passwordEncoder = passEncode;
 		this.accountService = accountService;
@@ -38,14 +40,21 @@ public class CustomerService {
 
 		//email already exists or not is checked
 		if(customerRepository.findByEmail(customer.getEmail()).isPresent()) {
-			throw new RuntimeException("This email is already Registered.");
+			throw new CustomerExistsException("This email is already Registered.");
 		}
+		//Age checking logic
+		int age = Period.between(customer.getDob() , LocalDate.now()).getYears();
+
+		if(age < 18 || age > 100){
+			throw new AgeInvalidException("Age is not between 18 and 100.");
+		}
+
 		BigDecimal initialBalance = account.getBalance();
 
 		BigDecimal minIniBalance = new BigDecimal("1000.0");
 
 		if(initialBalance.compareTo(minIniBalance) < 0){
-			throw new RuntimeException("Initial Balance is Less Than minimum Balance.");
+			throw new IniBalanceInvalidException("Initial Balance is Less Than minimum Balance.");
 		}
 
 		customer.setPasswordHashed(passwordEncoder.encode(customer.getPasswordHashed()));
@@ -64,7 +73,7 @@ public class CustomerService {
 		Customer customer = getCustomerByEmail(email);
 
 		if(!isPasswordCorrect(customer , plainPass)) {
-			throw new RuntimeException("Password is incorrect.");
+			throw new PasswordIncorrectException("Password is incorrect.");
 		}
 		
 		return customer;
@@ -76,7 +85,10 @@ public class CustomerService {
 		Customer customer = getCustomerById(customerId);
 		
 		if(!isPasswordCorrect(customer , oldPlainPass)) {
-			throw new RuntimeException("Password is incorrect");
+			throw new PasswordIncorrectException("Password is incorrect");
+		}
+		if(passwordEncoder.matches(newPlainPass , customer.getPasswordHashed())){
+			throw new SameNewPasswordException("new password can not be same as the old password");
 		}
 
 		customer.setPasswordHashed(passwordEncoder.encode(newPlainPass));
@@ -90,13 +102,13 @@ public class CustomerService {
 		Customer customer = getCustomerById(customerId);
 
 		if(!isPasswordCorrect(customer , plainPass)) {
-			throw new RuntimeException("Password is incorrect");
+			throw new PasswordIncorrectException("Password is incorrect");
 		}
 
 		//Don't let customer delete his id before deactivating the all accounts
 		boolean hasActiveAccount = accountService.hasActiveAccount(customerId);
 		if(hasActiveAccount){
-			throw new RuntimeException("Please Deactivate all Accounts");
+			throw new ActiveAccountException("Please Deactivate all Accounts");
 		}
 
 		customer.setIsCustomerValid(false);
@@ -108,11 +120,11 @@ public class CustomerService {
 		Customer customer = getCustomerById(customerId);
 
 		if(!isPasswordCorrect(customer, plainPass)){
-			throw new RuntimeException("Password is incorrect");
+			throw new PasswordIncorrectException("Password is incorrect");
 		}
 
 		if(!isOwnerOfAccount(customer , accNo)){
-			throw new RuntimeException("Account not found");
+			throw new UnauthorizedAccountException("Account not found");
 		}
 
 		accountService.deleteAccount(accNo);
@@ -122,11 +134,11 @@ public class CustomerService {
 		Customer customer = getCustomerById(customerId);
 
 		if(!isPasswordCorrect(customer , plainPass)){
-			throw new RuntimeException("Password is incorrect");
+			throw new PasswordIncorrectException("Password is incorrect");
 		}
 
 		if(!isOwnerOfAccount(customer , accNo)){
-			throw new RuntimeException("Account not found");
+			throw new UnauthorizedAccountException("Account not found");
 		}
 
 		accountService.updatePin(accNo , newPlainPin);
@@ -143,12 +155,12 @@ public class CustomerService {
 	public Customer getCustomerById(Long customerId) {
 
 		return customerRepository.findById(customerId)
-				.orElseThrow(() -> new RuntimeException("Customer not found."));
+				.orElseThrow(() -> new CustomerNotFoundException("Customer not found."));
 	}
 
 	public Customer getCustomerByEmail(String email){
 		return customerRepository.findByEmail(email)
-				.orElseThrow( () -> new RuntimeException("Customer not found."));
+				.orElseThrow( () -> new CustomerNotFoundException("Customer not found."));
 	}
 
 	public boolean isOwnerOfAccount(Customer customer , Long accNo){
