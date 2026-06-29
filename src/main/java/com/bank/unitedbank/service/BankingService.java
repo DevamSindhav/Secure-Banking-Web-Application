@@ -2,6 +2,7 @@ package com.bank.unitedbank.service;
 
 import com.bank.unitedbank.exception.InsufficientBalanceException;
 import com.bank.unitedbank.exception.PinIncorrectException;
+import com.bank.unitedbank.exception.TransferToSelfException;
 import com.bank.unitedbank.exception.ZeroAmountException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -62,6 +63,10 @@ public class BankingService {
     }
 
     public void transfer(Long senderAccNo , Long receiverAccNo , String plainPin , BigDecimal amount){
+
+        if(senderAccNo.equals(receiverAccNo)){
+            throw new TransferToSelfException("Cannot transfer to Same Account");
+        }
 
         if(amount.compareTo(new BigDecimal("0.0")) <= 0){
             throw new ZeroAmountException("Amount can not be 0");

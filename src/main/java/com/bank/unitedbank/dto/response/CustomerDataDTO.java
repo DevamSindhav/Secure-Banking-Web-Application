@@ -3,7 +3,6 @@ package com.bank.unitedbank.dto.response;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.bank.unitedbank.entity.Account;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

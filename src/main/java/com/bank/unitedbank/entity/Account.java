@@ -58,6 +58,6 @@ public class Account {
 
     //Mapping Transactions to account
     @OneToMany(mappedBy = "account")
-    List<Transaction> transactionList;
+    private List<Transaction> transactionList;
 
 }

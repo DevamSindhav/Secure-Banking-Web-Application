@@ -69,7 +69,7 @@ public class Customer{
 	//no cascade Type chosen as we don't want to delete customer
 	//till all accounts are active
 	@OneToMany(mappedBy = "customer")
-	List<Account> accountList;
+	private List<Account> accountList;
 
 	@Column(name = "address" , nullable = false)
 	private String address;
