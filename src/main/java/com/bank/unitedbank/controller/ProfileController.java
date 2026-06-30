@@ -1,134 +1,113 @@
 package com.bank.unitedbank.controller;
 
+import com.bank.unitedbank.dto.request.DeleteAccountDTO;
+import com.bank.unitedbank.dto.request.DeleteCustomerDTO;
+import com.bank.unitedbank.dto.request.UpdatePinDTO;
+import com.bank.unitedbank.dto.request.UpdatePasswordDTO;
+import com.bank.unitedbank.exception.UnauthorizedAccountException;
 import com.bank.unitedbank.service.CustomerService;
 
-import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-
-@Controller
+@RestController
+@RequestMapping("/update")
 public class ProfileController {
 
 	private final CustomerService customerService;
-	
+
 	public ProfileController(CustomerService cService) {
 		
 		this.customerService = cService;
 	}
+
 	
-	@GetMapping("/updatePassword")
-	public String showUpdatePasswordPage(HttpSession session) {
-		
-		Integer accNo = (Integer) session.getAttribute("accNo");
-		
-		if(accNo == null) {
-			return "redirect:/login";
+	@PutMapping("/password")
+	public ResponseEntity<?> changePassword(@Valid @RequestBody UpdatePasswordDTO upPassDTO) {
+
+		Long customerId =
+				(Long) SecurityContextHolder.getContext()
+								.getAuthentication().getPrincipal();
+
+		Long typedId = upPassDTO.getCustomerId();
+
+		if(!typedId.equals(customerId)){
+			throw new UnauthorizedAccountException("Unauthorized access!");
 		}
-		
-		return "updatePasswordPage";
-	}
-	
-	@PostMapping("/processUpdatePassword")
-	public String changePassword(@RequestParam String oldPass , @RequestParam String newPass ,
-								HttpSession session , Model model ,
-								RedirectAttributes redirectAttributes) {
-		try {
-			Integer accNo = (Integer) session.getAttribute("accNo");
-			
-			if(accNo == null) {
-				return "redirect:/login";
-			}
-			
-			customerService.passwordUpdate(accNo, oldPass, newPass);
-			session.invalidate();
-			redirectAttributes.addAttribute("passwordUpdated" , true);
-			return "redirect:/login";
-			
-		}catch(RuntimeException e) {
-			
-			model.addAttribute("error" , e.getMessage());
-			return "updatePasswordPage";
-		}
-		
+
+		customerService.passwordUpdate(
+				upPassDTO.getCustomerId(),
+				upPassDTO.getOldPassword(),
+				upPassDTO.getNewPassword()
+		);
+		return new ResponseEntity<>( "Password updated successfully!", HttpStatus.OK);
 	}
 		
-	@GetMapping("/updatePin")
-	public String showUpdatePinPage(HttpSession session) {
-			
-		Integer accNo = (Integer) session.getAttribute("accNo");
-			
-		if(accNo == null) {
-			return "redirect:/login";
+	@PutMapping("/pin")
+	public ResponseEntity<?> showUpdatePinPage(@Valid @RequestBody UpdatePinDTO upPinDTO) {
+
+		Long customerId =
+				(Long) SecurityContextHolder.getContext()
+						.getAuthentication().getPrincipal();
+
+		Long typedId = upPinDTO.getCustomerId();
+
+		if(!typedId.equals(customerId)){
+			throw new UnauthorizedAccountException("Unauthorized access!");
 		}
-			
-		return "updatePinPage";
-	}
-		
-	@PostMapping("/processUpdatePin")
-	public String changePin(@RequestParam String password , @RequestParam String newPin ,
-							HttpSession session , Model model ,
-							RedirectAttributes redirectAttributes) {
-		try {
-			Integer accNo = (Integer) session.getAttribute("accNo");
-				
-			if(accNo == null) {
-				return "redirect:/login";
-			}
-				
-			customerService.pinUpdate(accNo, password, newPin);
-				
-			redirectAttributes.addFlashAttribute("pinUpdated" , true);
-			return "redirect:/updatePin";
-				
-		}catch(RuntimeException e) {
-				
-			model.addAttribute("error" , e.getMessage());
-			return "updatePinPage";
-		}
+
+		customerService.updateAccountPin(
+				upPinDTO.getCustomerId(),
+				upPinDTO.getAccNo(),
+				upPinDTO.getPassword(),
+				upPinDTO.getNewPin()
+		);
+		return new ResponseEntity<>( "Pin updated successfully!", HttpStatus.OK);
 	}
 	
-	@GetMapping("/deleteAccount")
-	public String showDeleteAccountPage(HttpSession session) {
-			
-		Integer accNo = (Integer) session.getAttribute("accNo");
-			
-		if(accNo == null) {
-			return "redirect:/login";
+	@DeleteMapping("/delete/account")
+	public ResponseEntity<?> deleteAccount(@Valid @RequestBody DeleteAccountDTO deleteAccountDTO) {
+
+		Long customerId =
+				(Long) SecurityContextHolder.getContext()
+						.getAuthentication().getPrincipal();
+
+		Long typedId = deleteAccountDTO.getCustomerId();
+
+		if(!typedId.equals(customerId)){
+			throw new UnauthorizedAccountException("Unauthorized access!");
 		}
-			
-		return "deleteAccountPage";
+
+		customerService.deleteAccount(
+				deleteAccountDTO.getCustomerId(),
+				deleteAccountDTO.getAccNo(),
+				deleteAccountDTO.getPassword()
+		);
+
+		return new ResponseEntity<>("Account deleted successfully!" , HttpStatus.OK);
 	}
-	
-	@PostMapping("/processDeleteAccount")
-	public String deleteAccount(@RequestParam String password , HttpSession session,
-								Model model , RedirectAttributes redirectAttributes) {
-		
-		try {
-			
-			Integer accNo = (Integer) session.getAttribute("accNo");
-			if(accNo == null) {
-				return "redirect:/login";
-			}
-			
-			customerService.deleteAccount(accNo, password);
-			
-			session.invalidate();
-			redirectAttributes.addAttribute("accountDeleted" , true);
-			return "redirect:/";
-			
-		}catch(RuntimeException e) {
-			
-			model.addAttribute("error" , e.getMessage());
-			return "deleteAccountPage";
+
+	@DeleteMapping("/delete/customer")
+	public ResponseEntity<?> deleteCustomer(@Valid @RequestBody DeleteCustomerDTO deleteCustomerDTO){
+
+		Long customerId =
+				(Long) SecurityContextHolder.getContext()
+						.getAuthentication().getPrincipal();
+
+		Long typedId = deleteCustomerDTO.getCustomerId();
+
+		if(!typedId.equals(customerId)){
+			throw new UnauthorizedAccountException("Unauthorized access!");
 		}
-		
-		
+
+		customerService.deleteCustomer(
+				deleteCustomerDTO.getCustomerId(),
+				deleteCustomerDTO.getPassword()
+		);
+
+		return new ResponseEntity<>("Customer account deleted successfully!" , HttpStatus.OK);
 	}
-			
 }

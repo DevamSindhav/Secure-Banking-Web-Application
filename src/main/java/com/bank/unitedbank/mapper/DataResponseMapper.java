@@ -1,10 +1,13 @@
 package com.bank.unitedbank.mapper;
 
+import com.bank.unitedbank.dto.response.TransactionDataDTO;
 import com.bank.unitedbank.entity.Customer;
 import com.bank.unitedbank.dto.response.CustomerDataDTO;
 
 import com.bank.unitedbank.entity.Account;
 import com.bank.unitedbank.dto.response.AccountDataDTO;
+
+import java.util.List;
 
 public class DataResponseMapper {
 
@@ -28,6 +31,20 @@ public class DataResponseMapper {
                 account.getAccNo(),
                 account.getAccType(),
                 account.getBalance()
+        );
+    }
+
+
+    //to make account dto with transactions
+    public static AccountDataDTO toAccountTransactionDTO(
+            Account account,
+            List<TransactionDataDTO> transactionDataDTOList
+    ){
+        return new AccountDataDTO(
+                account.getAccNo(),
+                account.getAccType(),
+                account.getBalance(),
+                transactionDataDTOList
         );
     }
 

@@ -1,107 +1,64 @@
 //this controller handles all the public action a user can take 
 //like login, logout , or register etc.
 
-
 package com.bank.unitedbank.controller;
 
+import com.bank.unitedbank.entity.Account;
 import com.bank.unitedbank.entity.Customer;
 import com.bank.unitedbank.service.CustomerService;
-import com.bank.unitedbank.dto.CustomerRegisterDTO;
-import jakarta.servlet.http.HttpSession;
-
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.ui.Model;
+import com.bank.unitedbank.dto.request.RegisterDTO;
+import com.bank.unitedbank.dto.request.LoginDTO;
+import com.bank.unitedbank.dto.response.AuthResponse;
+import com.bank.unitedbank.mapper.RegisterMapper;
+import com.bank.unitedbank.security.JwtUtil;
 
 
-@Controller
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+
+@RestController
+@RequestMapping("/auth")
 public class AuthorizationController{
 	
 	private final CustomerService customerService;
+	private final JwtUtil jwtUtil;
 	
-	public AuthorizationController(CustomerService customerService) {
+	public AuthorizationController(CustomerService customerService, JwtUtil jwtUtil) {
 		
 		this.customerService = customerService;
-	}
-	
-	@GetMapping("/")
-	public String showIndexPage() {
-	    return "indexPage"; 
-	}
-	
-	@GetMapping("/register")
-	public String showRegistration(Model model) {
-		
-		model.addAttribute("customerDTO" , new CustomerRegisterDTO());
-		return "registerPage";
-		
+		this.jwtUtil = jwtUtil;
 	}
 	
 	@PostMapping("/register")
-	public String registrationProcess(@ModelAttribute CustomerRegisterDTO customerRegisterDTO,
-										RedirectAttributes redirectAttributes ,Model model) {
-		
-		try {
+	public ResponseEntity<?> registrationProcess(@Valid @RequestBody RegisterDTO registerDTO) {
 
-			//Convert the DTO fields in to a real Customer object
+		//Convert the DTO fields in to a real Customer object
 
-			Customer realCustomer = CustomerRegisterDTO.convertCRegDTOtoCustomer(customerRegisterDTO);
-			
+		Customer customer = RegisterMapper.toCustomerEntity(registerDTO);
+		Account account   = RegisterMapper.toAccountEntity(registerDTO);
 
-			//success
-			customerService.registerCustomer(realCustomer);
-			redirectAttributes.addAttribute("registeredUser", true);
-			return "redirect:/login";
-		
-		}catch(RuntimeException e) {
-			
-			//Failed Registration
-			model.addAttribute("error" , e.getMessage());
-			return "registerPage";
-		}
+		//success
+		customerService.registerCustomer(customer , account);
+
+		return new ResponseEntity<>(new AuthResponse("Customer registered successfully!") , HttpStatus.CREATED);
 		
 	}
-	
-	@GetMapping("/login")
-	public String showLogin() {
-		return "loginPage";
-	}
-	
-	@PostMapping("/processlogin")
-	public String loginProcess(@RequestParam String email ,@RequestParam String password, 
-								HttpSession session, Model model) {
-		
-		try {
-			
+
+	@PostMapping("/login")
+	public ResponseEntity<?> loginProcess(@Valid @RequestBody LoginDTO loginDTO) {
 			//verification of user
-			Customer validCustomer = customerService.loginValidation(email, password);
-			
-			//session attribute setup
-			//only saved the accNo
-			//as storing whole customer will raise security as well as performance concerns
-			session.setAttribute("accNo", validCustomer.getAccNo());
-			
-			return "redirect:/dashboard";
-		}catch(RuntimeException e) {
-			
-			model.addAttribute("error" , e.getMessage());
-			return "loginPage";
-		}
-		
-	}
-	
-	@GetMapping("/logout")
-	public String logout(HttpSession session) {
-		
-		//need to invalidate the current session when logging out
-		//only redirecting to the index page is not real logout
-		session.invalidate();
-		
-		return "redirect:/";
+			Customer validCustomer =
+					customerService.loginValidation(loginDTO.getEmail() , loginDTO.getPassword());
+
+			String token = jwtUtil.generateToken(validCustomer.getCustomerId());
+
+			AuthResponse authResponse = new AuthResponse("Logged in successfully!" , token);
+
+			return new ResponseEntity<>( authResponse , HttpStatus.OK);
+
 	}
 	
 }

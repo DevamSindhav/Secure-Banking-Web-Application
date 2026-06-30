@@ -20,9 +20,4 @@ public class DeleteAccountDTO {
     @NotBlank(message = "password blank")
     @Size(min = 8 , max = 16 , message = "password not of length range 8-16")
     private String password;
-
-    @NotBlank(message = "pin blank")
-    @Pattern(regexp = "^[0-9]{4}$" , message = "not 4 digits")
-    private String newPin;
-
 }

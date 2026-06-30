@@ -1,154 +1,130 @@
 //this controller handles the operations listed below
 //deposit , withdraw , mini statement or all the transactions display
 
-
-
 package com.bank.unitedbank.controller;
 
-import com.bank.unitedbank.dto.CustomerDAtaDTO;
+import com.bank.unitedbank.dto.*;
+import com.bank.unitedbank.dto.response.AccountDataDTO;
+import com.bank.unitedbank.dto.response.CustomerDataDTO;
 import com.bank.unitedbank.dto.response.TransactionDataDTO;
+import com.bank.unitedbank.entity.Account;
+import com.bank.unitedbank.exception.UnauthorizedAccountException;
+import com.bank.unitedbank.mapper.DataResponseMapper;
+import com.bank.unitedbank.mapper.TransactionResponseMapper;
 import com.bank.unitedbank.service.TransactionService;
-import com.bank.unitedbank.entity.Transaction;
-import com.bank.unitedbank.entity.Customer;
 import com.bank.unitedbank.service.CustomerService;
-import jakarta.servlet.http.HttpSession;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.bank.unitedbank.service.AccountService;
+import com.bank.unitedbank.entity.Customer;
 
+
+import jakarta.validation.constraints.NotNull;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 
-@Controller
+@RestController
+@RequestMapping("/customer")
 public class DashboardController {
 	
 	private final TransactionService transactionService;
 	private final CustomerService customerService;
+	private final AccountService accountService;
 	
-	public DashboardController(TransactionService tService, CustomerService cService) {
+	public DashboardController(
+			TransactionService tService,
+			CustomerService cService,
+			AccountService aService
+	) {
 		this.transactionService = tService;
 		this.customerService = cService;
+		this.accountService = aService;
 	}
 	
-	@GetMapping("/dashboard")
-	public String showDashboard(HttpSession session , RedirectAttributes redirectAttributes , Model model) {
-		
-		try {
-			
-			//this first fetches the data then we redirect this to the dasboardPage.jsp
-			//which displays the fetched data
-			
-			Integer accNo = (Integer)(session.getAttribute("accNo"));
-			
-			if (accNo == null) {
-	            return "redirect:/login"; 
-	        }
-			
-			//fetches the customer entity
-			Customer customer = customerService.getCustomerById(accNo);
+	@GetMapping("/detail")
+	public ResponseEntity<?> showDashboard(){
 
-			//we need not pass the password and pin to the user so
-			//convert the Customer to a DTO object
+		//extract the customerId from the token sent by user
+		//customer is sure to have token if request reached this far....
+		Long customerId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-			CustomerDAtaDTO customerDTO = CustomerDAtaDTO.convertCustomerToCRDTO(customer);
+		//fetches the customer entity
+		Customer customer = customerService.getCustomerById(customerId);
+		//we need not pass the password and pin to the user so
+		//convert the Customer to a DTO object
 
+		CustomerDataDTO customerDTO = DataResponseMapper.toCustomerResponseDTO(customer);
 
-			model.addAttribute("customerProfile" , customerDTO);
-			
-			List<Transaction> transactions = transactionService.getMiniStatement(accNo);
+		return new ResponseEntity<>(customerDTO , HttpStatus.OK);
 
-			//below code converts the list of transactions to the list of DTO object
-			List<TransactionDataDTO> transactionsDTO = transactions.stream()
-					.map(TransactionDataDTO::convertTransactionToTRDTO)
-					.toList();
+	}
 
-			model.addAttribute("recentTransactions",transactionsDTO);
-			
-			return "dashboardPage";
-			
-		}catch(RuntimeException e) {
-			redirectAttributes.addFlashAttribute("error" , e.getMessage());
-			return "redirect:/login";
+	@GetMapping("/account/{accNo}")
+	public ResponseEntity<?> getAccountDetails(@NotNull @PathVariable Long accNo){
+
+		//JWT validation and ownerShip validation remains
+
+		Long customerId =
+				(Long) SecurityContextHolder.getContext()
+						.getAuthentication().getPrincipal();
+
+		if(!customerService.isOwnerOfAccount(customerId , accNo)){
+			throw new UnauthorizedAccountException("The requested details are unauthorized.");
 		}
-		
+
+		Account account = accountService.getAccountById(accNo);
+
+		//get the transaction Data DTO
+		List<TransactionDataDTO> transactionDataDTOList =
+				TransactionResponseMapper.toListOfTransactionResponseDTO(
+						transactionService.getMiniStatement(accNo)
+				);
+
+		//Build a response by both account and transaction details
+		AccountDataDTO accountDataDTO =
+				DataResponseMapper.toAccountTransactionDTO(account,transactionDataDTOList);
+
+		return new ResponseEntity<>(accountDataDTO , HttpStatus.OK);
+
 	}
 	
-	@GetMapping("/allTransaction")
-	public String getAllTransaction(HttpSession session ,RedirectAttributes redirectAttributes , Model model) {
+	@GetMapping("/mtransactions/{accNo}")
+	public ResponseEntity<?> getMonthlyTransaction(
+			@NotNull @PathVariable Long accNo,
+			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+	) {
 		
-		try {
-			
-			Integer accNo = (Integer)session.getAttribute("accNo");
-			if(accNo == null) {
-				return "redirect:/login";
-			}
-			
+		Long customerId = (Long) SecurityContextHolder.getContext()
+								.getAuthentication().getPrincipal();
 
-			CustomerDAtaDTO customerResponseDTO =
-					CustomerDAtaDTO.convertCustomerToCRDTO(customerService.getCustomerById(accNo));
-
-			model.addAttribute("customerProfile" , customerResponseDTO);
-			
-			List<Transaction> allTransactions = transactionService.getAllStatement(accNo);
-
-			//below code converts the list of transactions to the list of DTO object
-			List<TransactionDataDTO> transactionsDTO = allTransactions.stream()
-					.map(TransactionDataDTO::convertTransactionToTRDTO)
-					.toList();
-
-			model.addAttribute("allTransactions" , transactionsDTO);
-			
-			return "fullStatementPage";
-			
-		}catch(RuntimeException e) {
-			redirectAttributes.addFlashAttribute("error" , e.getMessage());
-			return "redirect:/dashboard";
+		if(!customerService.isOwnerOfAccount(customerId, accNo)) {
+			throw new UnauthorizedAccountException("The requested details are unauthorized.");
 		}
-	}
 
-//	@GetMapping("/filterTransactionOnDate")
-//	public String getTransactionsByMonth(
-//			@RequestParam LocalDate startDate ,
-//			@RequestParam LocalDate endDate,
-//			HttpSession session, Model model,
-//			RedirectAttributes redirectAttributes
-//	){
-//
-//		try{
-//
-//			Integer accNo = (Integer) session.getAttribute("accNo");
-//
-//			if(accNo == null){
-//				return "redirect:/login";
-//			}
-//
-//			Customer customer = customerService.getCustomerById(accNo);
-//
-//			CustomerResponseDTO customerResponseDTO = CustomerResponseDTO.convertCustomerToCRDTO(customer);
-//
-//			model.addAttribute("customerProfile" , customerResponseDTO);
-//
-//			//converting the LocalDate to LocalDateTime range for the service
-//			//as we have stored LocalDateTime in DB
-//
-//			LocalDateTime startDateTime = startDate.atStartOfDay();
-//			LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-//
-//			List<Transaction> transactions = transactionService.getMonthStatement(accNo, startDateTime , endDateTime);
-//
-//			List<TransactionResponseDTO> transactionsDTO = transactions.stream()
-//					.map(TransactionResponseDTO::convertTransactionToTRDTO)
-//					.toList();
-//
-//			model.addAttribute("transactionsByMonth" , transactionsDTO);
-//
-//			return "monthStatementPage";
-//
-//		}catch(RuntimeException e){
-//			redirectAttributes.addFlashAttribute("error" , e.getMessage());
-//			return "redirect:/dashboard";
-//		}
-//
-//	}
+		LocalDateTime startDT = startDate.atStartOfDay();
+		LocalDateTime endDT = endDate.atTime(LocalTime.MAX);
+
+		List<TransactionDataDTO> transactionDataDTOList
+				= TransactionResponseMapper.toListOfTransactionResponseDTO(
+						transactionService.getMonthStatement(accNo ,
+								startDT.atZone(ZoneId.systemDefault()).toInstant() ,
+								endDT.atZone(ZoneId.systemDefault()).toInstant()
+						)
+					);
+
+
+			
+		return new ResponseEntity<>( transactionDataDTOList , HttpStatus.OK);
+
+	}
 
 }

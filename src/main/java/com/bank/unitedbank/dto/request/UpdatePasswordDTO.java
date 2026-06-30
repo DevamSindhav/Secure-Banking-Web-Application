@@ -1,7 +1,6 @@
 package com.bank.unitedbank.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
 
@@ -12,20 +11,17 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateAccountPinDTO {
+public class UpdatePasswordDTO {
 
     @NotNull(message = "customer id invalid")
     private Long customerId;
 
-    @NotNull(message = "account id invalid")
-    private Long accNo;
-
-    @NotBlank(message = "password blank")
+    @NotBlank(message = "old password blank")
     @Size(min = 8 , max = 16 , message = "old password not of length range 8-16")
-    private String password;
+    private String oldPassword;
 
-    @NotBlank(message = "pin blank")
-    @Pattern(regexp = "^[0-9]{4}$" , message = "not 4 digits")
-    private String newPin;
+    @NotBlank(message = "new password blank")
+    @Size(min = 8 , max = 16 , message = "new password not of length range 8-16")
+    private String newPassword;
 
 }

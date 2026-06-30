@@ -36,7 +36,7 @@ public class CustomerService {
 		this.bankingService = bankingService;
 	}
 	
-	public Customer registerCustomer(Customer customer , Account account) {
+	public void registerCustomer(Customer customer , Account account) {
 
 		//email already exists or not is checked
 		if(customerRepository.findByEmail(customer.getEmail()).isPresent()) {
@@ -65,7 +65,6 @@ public class CustomerService {
 		Account initialAccount = accountService.createAccount(account);
 		bankingService.deposit(initialAccount.getAccNo() , initialBalance);
 
-		return registeredCustomer;
 	}
 
 	public Customer loginValidation(String email , String plainPass) {
@@ -164,6 +163,15 @@ public class CustomerService {
 	}
 
 	public boolean isOwnerOfAccount(Customer customer , Long accNo){
+		Account account = accountService.getAccountById(accNo);
+
+		return account.getCustomer()
+				.getCustomerId()
+				.equals(customer.getCustomerId());
+	}
+
+	public boolean isOwnerOfAccount(Long customerId , Long accNo){
+		Customer customer = getCustomerById(customerId);
 		Account account = accountService.getAccountById(accNo);
 
 		return account.getCustomer()
