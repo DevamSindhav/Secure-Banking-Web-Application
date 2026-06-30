@@ -29,7 +29,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@SQLRestriction("is_customer_valid = true")
+@SQLRestriction(value = "is_customer_valid = true")
 @Builder //this is very useful annotation for Dto to entity mapping
 public class Customer{
 
@@ -90,7 +90,12 @@ public class Customer{
 	//Decided to implement SoftDelete rather than a permanent delete
 	//as I read that this is the bank standard
 	//same is for account and transaction
+	@Builder.Default
 	@Column(name = "is_customer_valid" , nullable = false)
 	private Boolean isCustomerValid = true;
+
+	@Builder.Default
+	@Column(name = "is_email_verified", nullable = false)
+	private Boolean isEmailVerified = false;
 
 }

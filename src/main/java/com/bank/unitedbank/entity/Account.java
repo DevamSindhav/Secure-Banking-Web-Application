@@ -21,15 +21,6 @@ import org.hibernate.annotations.SQLRestriction;
 @Builder
 public class Account {
 
-    //RegisterDTO to account conversion constructor
-
-    //handled using BUILDER annotation
-//    public Account(String accType, BigDecimal balance, String pinHashed) {
-//        this.accType = accType;
-//        this.balance = balance;
-//        this.pinHashed = pinHashed;
-//    }
-
     @Id//tells that this is primary key
     @Column(name = "account_number")
     @GeneratedValue(strategy = GenerationType.IDENTITY)//for auto accNO generation
@@ -53,6 +44,7 @@ public class Account {
     private Instant createdAt;
 
     //for soft delete implementation
+    @Builder.Default
     @Column(name = "is_account_valid" , nullable = false)
     private Boolean isAccountValid = true;
 

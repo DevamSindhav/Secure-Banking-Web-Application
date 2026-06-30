@@ -68,8 +68,12 @@ public class CustomerService {
 	}
 
 	public Customer loginValidation(String email , String plainPass) {
-		
+
 		Customer customer = getCustomerByEmail(email);
+
+		if(!isEmailVerified(customer.getCustomerId())){
+			throw new EmailNotVerifiedException("Please first verify your email to login.");
+		}
 
 		if(!isPasswordCorrect(customer , plainPass)) {
 			throw new PasswordIncorrectException("Password is incorrect.");
@@ -94,6 +98,20 @@ public class CustomerService {
 		
 		customerRepository.save(customer);
 		
+	}
+
+	public void passwordUpdate(String email ,  String newPlainPass) {
+
+		Customer customer = getCustomerByEmail(email);
+
+		if(passwordEncoder.matches(newPlainPass , customer.getPasswordHashed())){
+			throw new SameNewPasswordException("new password can not be same as the old password");
+		}
+
+		customer.setPasswordHashed(passwordEncoder.encode(newPlainPass));
+
+		customerRepository.save(customer);
+
 	}
 
 	public void deleteCustomer(Long customerId , String plainPass) {
@@ -143,6 +161,27 @@ public class CustomerService {
 		accountService.updatePin(accNo , newPlainPin);
 	}
 	//Helper Methods
+
+	public boolean isEmailVerified(Long customerId){
+
+		return getCustomerById(customerId).getIsEmailVerified();
+
+	}
+
+	public boolean isEmailVerified(String email){
+
+		return getCustomerByEmail(email).getIsEmailVerified();
+
+	}
+
+	public void markEmailVerified(String email){
+		Customer customer = getCustomerByEmail(email);
+
+		customer.setIsEmailVerified(true);
+
+		customerRepository.save(customer);
+	}
+
 	public boolean isPasswordCorrect(Customer customer , String plainPass){
 
 		return passwordEncoder.matches(
@@ -177,6 +216,10 @@ public class CustomerService {
 		return account.getCustomer()
 				.getCustomerId()
 				.equals(customer.getCustomerId());
+	}
+
+	public String getEmail(Long customerId){
+		return getCustomerById(customerId).getEmail();
 	}
 
 }

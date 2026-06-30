@@ -20,7 +20,8 @@ public class GlobalExceptionHandler {
             IniBalanceInvalidException.class,
             InsufficientBalanceException.class,
             ZeroAmountException.class,
-            TransferToSelfException.class
+            TransferToSelfException.class,
+            OtpException.class
     })
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ErrorResponse badRequestException(RuntimeException exception){
@@ -52,7 +53,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = {
             UnauthorizedAccountException.class,
             PasswordIncorrectException.class,
-            PinIncorrectException.class
+            PinIncorrectException.class,
+            EmailNotVerifiedException.class
     })
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
     public ErrorResponse unauthorizedAccessException(RuntimeException exception){

@@ -1,33 +1,53 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+ HELP.md
+    target/
+    !.mvn/wrapper/maven-wrapper.jar
+    !**/src/main/**/target/
+    !**/src/test/**/target/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+    ### Security & Secrets (CRITICAL) ###
+    src/main/resources/application.properties
+    src/main/resources/application.yml
+    *.env
+    *.pem
+    *.key
+    .credentials/
+    secrets.json
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+    ### Logs ###
+    *.log
+    logs/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+    ### IntelliJ IDEA ###
+    .idea/
+    *.iws
+    *.iml
+    *.ipr
+    out/
+    !**/src/main/**/out/
+    !**/src/test/**/out/
 
-### VS Code ###
-.vscode/
+    ### Eclipse / STS ###
+    .apt_generated
+    .classpath
+    .factorypath
+    .project
+    .settings
+    .springBeans
+    .sts4-cache
+
+    ### NetBeans ###
+    /nbproject/private/
+    /nbbuild/
+    /dist/
+    /nbdist/
+    /.nb-gradle/
+    build/
+    !**/src/main/**/build/
+    !**/src/test/**/build/
+
+    ### VS Code ###
+    .vscode/
+
+    ### OS Generated Files ###
+    .DS_Store
+    Thumbs.db

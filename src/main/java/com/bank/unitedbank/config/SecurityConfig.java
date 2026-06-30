@@ -34,7 +34,7 @@ public class SecurityConfig {
             
             //allow for a specific requests to pass through without tokens like for login and registering
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/auth/**").permitAll()//login and register public
+                    .requestMatchers("/auth/**" , "/verify/**" , "/update/forgot/**").permitAll()//login and register public
                     .anyRequest().authenticated()
             )
                 .exceptionHandling(exceptions -> exceptions
