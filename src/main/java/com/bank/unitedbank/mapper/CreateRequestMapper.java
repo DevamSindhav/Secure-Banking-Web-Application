@@ -1,10 +1,11 @@
 package com.bank.unitedbank.mapper;
 
+import com.bank.unitedbank.dto.request.NewAccountDTO;
 import com.bank.unitedbank.entity.Customer;
 import com.bank.unitedbank.entity.Account;
 import com.bank.unitedbank.dto.request.RegisterDTO;
 
-public class RegisterMapper {
+public class CreateRequestMapper {
 
     public static Customer toCustomerEntity(RegisterDTO registerDTO){
 
@@ -27,6 +28,15 @@ public class RegisterMapper {
                 .pinHashed(registerDTO.getPin())
                 .build();
 
+    }
+
+    public static Account toAccountEntity(NewAccountDTO newAccountDTO){
+
+        return Account.builder()
+                .accType(newAccountDTO.getAccType())
+                .balance(newAccountDTO.getBalance())
+                .pinHashed(newAccountDTO.getPin())
+                .build();
     }
 
 }

@@ -1,6 +1,7 @@
 package com.bank.unitedbank.service;
 
 import com.bank.unitedbank.exception.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.bank.unitedbank.entity.Customer;
@@ -64,6 +65,30 @@ public class CustomerService {
 		account.setCustomer(registeredCustomer);
 		Account initialAccount = accountService.createAccount(account);
 		bankingService.deposit(initialAccount.getAccNo() , initialBalance);
+
+	}
+
+	public void createAccount( Long customerId , String password , Account account){
+
+		Customer customer = getCustomerById(customerId);
+
+		if(!isPasswordCorrect(customer , password)){
+			throw new PasswordIncorrectException("Password is incorrect.");
+		}
+
+		BigDecimal initialBalance = account.getBalance();
+
+		BigDecimal minIniBalance = new BigDecimal("1000.0");
+
+		if(initialBalance.compareTo(minIniBalance) < 0){
+			throw new IniBalanceInvalidException("Initial Balance is Less Than minimum Balance.");
+		}
+
+		account.setCustomer(customer);
+
+		Account createdAccount = accountService.createAccount(account);
+
+		bankingService.deposit(createdAccount.getAccNo() , initialBalance);
 
 	}
 
@@ -160,8 +185,10 @@ public class CustomerService {
 
 		accountService.updatePin(accNo , newPlainPin);
 	}
-	//Helper Methods
 
+
+
+	//Helper Methods
 	public boolean isEmailVerified(Long customerId){
 
 		return getCustomerById(customerId).getIsEmailVerified();

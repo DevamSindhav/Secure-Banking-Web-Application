@@ -9,7 +9,7 @@ import com.bank.unitedbank.service.CustomerService;
 import com.bank.unitedbank.dto.request.RegisterDTO;
 import com.bank.unitedbank.dto.request.LoginDTO;
 import com.bank.unitedbank.dto.response.AuthResponse;
-import com.bank.unitedbank.mapper.RegisterMapper;
+import com.bank.unitedbank.mapper.CreateRequestMapper;
 import com.bank.unitedbank.security.JwtUtil;
 
 
@@ -37,8 +37,8 @@ public class AuthorizationController{
 
 		//Convert the DTO fields in to a real Customer object
 
-		Customer customer = RegisterMapper.toCustomerEntity(registerDTO);
-		Account account   = RegisterMapper.toAccountEntity(registerDTO);
+		Customer customer = CreateRequestMapper.toCustomerEntity(registerDTO);
+		Account account   = CreateRequestMapper.toAccountEntity(registerDTO);
 
 		//success
 		customerService.registerCustomer(customer , account);
